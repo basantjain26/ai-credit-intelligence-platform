@@ -103,26 +103,60 @@ Normalized ContentBlock
 
 
 STEP 2
+Step 2 — Document Intelligence Pipeline.
 
-Document ingestion                  ✅
-Deterministic classification        ✅
-Deterministic parsing
-   PDF                              ✅
-   DOCX                             ✅
-   XLSX                             ✅
-   CSV                              ✅
-   JSON                             ✅
-Normalized representation           ✅
-Persistence                         ✅
-
-Hard-document failure testing       ← NEXT
-Extraction quality gate             ← NEXT
-OCR / Document AI fallback          ⏳
-LLM/VLM fallback                    ⏳
-
-Layout understanding                ⏳
-Metadata extraction                 ⏳
-Financial entity extraction         ⏳
-Semantic chunking                   ⏳
-Embeddings                          ⏳
-Vector index                        ⏳
+SOURCE DOCUMENTS
+PDF | DOCX | XLSX | CSV | JSON
+        │
+        ▼
+1. Document Ingestion                    ✅ DONE
+        │
+        ▼
+2. Document Classification               ✅ DONE
+        │
+        ▼
+3. Deterministic Text/Table Extraction   ✅ DONE
+        │
+        ├── PDF                           ✅
+        ├── DOCX                          ✅
+        ├── XLSX                          ✅
+        ├── CSV                           ✅
+        └── JSON                          ✅
+        │
+        ▼
+4. Normalized Content Representation     ✅ DONE
+        │
+        ▼
+5. Extraction Persistence                ✅ DONE
+        │
+        ▼
+6. Hard-Document Failure Testing         ✅ STARTED
+        │
+        └── Scanned/image-only PDF        ✅ Created/tested
+        │
+        ▼
+7. Extraction Quality Evaluation         ✅ BASIC VERSION DONE
+        │
+        ▼
+8. Advanced AI/LLM Extraction            ← NEXT
+        │
+        ▼
+9. Layout Understanding                  ⏳
+        │
+        ▼
+10. Metadata Extraction                  ⏳
+        │
+        ▼
+11. Financial Entity Extraction          ⏳
+        │
+        ▼
+12. Validation + Reconciliation          ⏳
+        │
+        ▼
+13. Semantic Chunking                    ⏳
+        │
+        ▼
+14. Embeddings                           ⏳
+        │
+        ▼
+15. Vector Index                         ⏳
