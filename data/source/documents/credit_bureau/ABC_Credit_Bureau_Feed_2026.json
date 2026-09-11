@@ -1,0 +1,44 @@
+{
+  "feed_metadata": {
+    "provider": "Synthetic Commercial Credit Bureau",
+    "report_date": "2026-08-14",
+    "schema_version": "1.0"
+  },
+  "borrower": {
+    "customer_id": "CUST_000001",
+    "legal_name": "ABC Manufacturing Pvt Ltd",
+    "registration_number": "CIN-ABC-2012-0001"
+  },
+  "credit_profile": {
+    "credit_score": 642,
+    "total_credit_exposure": 127000000,
+    "active_credit_lines": 5,
+    "delinquency_count_12m": 4,
+    "delinquency_count_24m": 6,
+    "default_history_flag": false,
+    "legal_action_flag": false
+  },
+  "reported_facilities": [
+    {
+      "facility_type": "Term Loan",
+      "outstanding_balance": 43000000,
+      "status": "ACTIVE"
+    },
+    {
+      "facility_type": "Working Capital",
+      "outstanding_balance": 25000000,
+      "status": "ACTIVE"
+    },
+    {
+      "facility_type": "Equipment Finance",
+      "outstanding_balance": 15000000,
+      "status": "ACTIVE"
+    },
+    {
+      "facility_type": "External Trade Facility",
+      "outstanding_balance": 44000000,
+      "status": "ACTIVE"
+    }
+  ],
+  "source_note": "Synthetic source feed for the AI Credit Intelligence engineering project."
+}

@@ -1,0 +1,128 @@
+GitHub + Docker Compose + PostgreSQL locally, files/documents locally with an S3-compatible abstraction, and later deploy the working system to AWS RDS + S3.
+
+1. Data architecture
+
+We deliberately make the data environment realistic.
+Structured data
+PostgreSQL contains operational banking information:
+
+customers
+loan_applications
+existing_loans
+loan_payments
+bank_transactions
+credit_history
+collateral
+customer_relationships
+risk_scores
+
+Documents
+Object storage will contain:
+Annual reports
+Audited financial statements
+Balance sheets
+Income statements
+Cash-flow statements
+Loan applications
+Credit reports
+Collateral documents
+Bank lending policies
+Risk policies
+Industry reports
+Previous credit memos
+
+Formats : 
+PDF
+DOCX
+XLSX
+CSV
+JSON
+
+
+
+2. Document Intelligence Pipeline
+
+Documents cannot simply be thrown into a vector database.
+
+Document
+   ↓
+classification
+   ↓
+text/table extraction
+   ↓
+layout understanding
+   ↓
+metadata extraction
+   ↓
+financial entity extraction
+   ↓
+semantic chunking
+   ↓
+embedding
+   ↓
+vector index
+
+The system extracts things like:
+Revenue
+EBITDA
+Net Income
+Current Assets
+Current Liabilities
+Debt
+Cash
+Receivables
+Inventory
+Operating Cash Flow
+
+Tables require separate handling from narrative text.
+
+This lets you demonstrate Document AI, rather than just PDF → chunks → embeddings.
+
+
+
+
+
+
+
+Document
+   ↓
+Deterministic parser
+   ↓
+Quality checks
+   ↓
+Good enough? ── Yes ──> continue pipeline
+   │
+   No
+   ↓
+Advanced extraction
+OCR / layout model / multimodal LLM
+   ↓
+Validation
+   ↓
+Normalized ContentBlock
+
+
+STEP 2
+
+Document ingestion                  ✅
+Deterministic classification        ✅
+Deterministic parsing
+   PDF                              ✅
+   DOCX                             ✅
+   XLSX                             ✅
+   CSV                              ✅
+   JSON                             ✅
+Normalized representation           ✅
+Persistence                         ✅
+
+Hard-document failure testing       ← NEXT
+Extraction quality gate             ← NEXT
+OCR / Document AI fallback          ⏳
+LLM/VLM fallback                    ⏳
+
+Layout understanding                ⏳
+Metadata extraction                 ⏳
+Financial entity extraction         ⏳
+Semantic chunking                   ⏳
+Embeddings                          ⏳
+Vector index                        ⏳

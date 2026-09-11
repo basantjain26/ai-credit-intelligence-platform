@@ -1,0 +1,13 @@
+[project]
+name = "ai-credit-intelligence-platform"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "openpyxl>=3.1.5",
+    "psycopg2-binary>=2.9.10",
+    "pymupdf>=1.28.2",
+    "python-docx>=1.2.0",
+    "python-dotenv>=1.2.3",
+]
