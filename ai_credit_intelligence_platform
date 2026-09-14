@@ -82,81 +82,101 @@ This lets you demonstrate Document AI, rather than just PDF → chunks → embed
 
 
 
-
-
-Document
-   ↓
-Deterministic parser
-   ↓
-Quality checks
-   ↓
-Good enough? ── Yes ──> continue pipeline
-   │
-   No
-   ↓
-Advanced extraction
-OCR / layout model / multimodal LLM
-   ↓
-Validation
-   ↓
-Normalized ContentBlock
-
-
-STEP 2
-Step 2 — Document Intelligence Pipeline.
-
 SOURCE DOCUMENTS
 PDF | DOCX | XLSX | CSV | JSON
         │
         ▼
-1. Document Ingestion                    ✅ DONE
+1. Document Ingestion                         ✅ DONE
         │
         ▼
-2. Document Classification               ✅ DONE
+2. Document Classification                    ✅ DONE
         │
         ▼
-3. Deterministic Text/Table Extraction   ✅ DONE
+3. Deterministic Extraction                   ✅ DONE
         │
-        ├── PDF                           ✅
-        ├── DOCX                          ✅
-        ├── XLSX                          ✅
-        ├── CSV                           ✅
-        └── JSON                          ✅
-        │
-        ▼
-4. Normalized Content Representation     ✅ DONE
+        ├── PDF                               ✅
+        ├── DOCX                              ✅
+        ├── XLSX                              ✅
+        ├── CSV                               ✅
+        └── JSON                              ✅
         │
         ▼
-5. Extraction Persistence                ✅ DONE
+4. Normalized Content Representation          ✅ DONE
         │
         ▼
-6. Hard-Document Failure Testing         ✅ STARTED
-        │
-        └── Scanned/image-only PDF        ✅ Created/tested
+5. Extraction Persistence                     ✅ DONE
         │
         ▼
-7. Extraction Quality Evaluation         ✅ BASIC VERSION DONE
+6. Hard-Document Failure Testing              ✅ DONE - initial case
+        │
+        └── Scanned PDF                       ✅
         │
         ▼
-8. Advanced AI/LLM Extraction            ← NEXT
+7. Deterministic Extraction Quality Gate      ✅ DONE - basic version
         │
         ▼
-9. Layout Understanding                  ⏳
+8. AI / Multimodal LLM Extraction             ✅ DONE - core version
+        │
+        ├── PDF → image rendering             ✅
+        ├── Base64 image handling             ✅
+        ├── Multimodal LLM call               ✅
+        ├── Structured Output                 ✅
+        ├── Pydantic validation               ✅
+        ├── Strict JSON Schema                ✅
+        ├── Page-level extraction             ✅
+        ├── Token tracking                    ✅
+        ├── Latency tracking                  ✅
+        └── Cost estimation                   ✅
         │
         ▼
-10. Metadata Extraction                  ⏳
+9. LLM Extraction Quality Evaluation          ✅ BASIC VERSION DONE
+        │
+        ├── Ground-truth metrics              ✅
+        ├── Per-page expectations             ✅
+        ├── PASS / FAIL                       ✅
+        └── Accuracy calculation              ✅
         │
         ▼
-11. Financial Entity Extraction          ⏳
+10. Multi-page LLM Extraction                 ✅ DONE
+        │
+        ├── extract_page()                     ✅
+        ├── extract_document()                 ✅
+        ├── page iteration                     ✅
+        └── error propagation                  ✅
         │
         ▼
-12. Validation + Reconciliation          ⏳
+11. Document-Level Aggregation                ✅ BASIC VERSION DONE
+        │
+        ├── Merge sections                     ✅
+        ├── Merge financial metrics            ✅
+        ├── Preserve page provenance           ✅
+        ├── Aggregate tokens                   ✅
+        ├── Aggregate latency                  ✅
+        └── Aggregate cost                     ✅
         │
         ▼
-13. Semantic Chunking                    ⏳
+12. Financial Value Normalization             ← NEXT
         │
         ▼
-14. Embeddings                           ⏳
+13. Duplicate / Conflict Reconciliation       ⏳
         │
         ▼
-15. Vector Index                         ⏳
+14. Richer Layout Understanding               ⏳
+        │
+        ▼
+15. Metadata Extraction                       ⏳
+        │
+        ▼
+16. Financial Entity Extraction / Mapping     ⏳
+        │
+        ▼
+17. Validation + Provenance                   🟡 PARTIAL
+        │
+        ▼
+18. Semantic Chunking                         ⏳
+        │
+        ▼
+19. Embedding Generation                      ⏳
+        │
+        ▼
+20. Vector Index                              ⏳
