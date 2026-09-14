@@ -38,145 +38,222 @@ XLSX
 CSV
 JSON
 
+#
+
+Phase
+
+Status
+
+Main purpose
+
+1
+
+Data Architecture
+
+✅ Complete
+
+Build realistic borrower, application, loan, transaction, financial and document source data in PostgreSQL/files.
+
+2
+
+Document Intelligence Pipeline
+
+✅ Complete
+
+Ingest/classify/extract documents, multimodal fallback, normalize financial data, chunk, embed and index with pgvector.
+
+3
+
+Borrower Intelligence Agent
+
+▶️ Next
+
+Build a consolidated borrower profile from customer, directors, related parties, applications, loans and documents.
+
+4
+
+Financial Analysis Agent
+
+⏳
+
+Calculate financial ratios, trends, leverage, liquidity, profitability, DSCR and identify financial deterioration.
+
+5
+
+Transaction Investigation Agent
+
+⏳
+
+Analyze bank transactions for unusual amounts, related-party activity, concentration, circular transfers and suspicious patterns.
+
+6
+
+Enterprise Knowledge / RAG
+
+⏳
+
+Build production retrieval across policies, borrower documents, prior memos and other enterprise knowledge.
+
+7
+
+Policy Compliance Agent
+
+⏳
+
+Compare the credit case against lending policies and identify violations, exceptions and missing requirements.
+
+8
+
+Credit Risk ML Model
+
+⏳
+
+Train/serve a traditional ML model for probability of default and borrower risk classification.
+
+9
+
+External Research Agent
+
+⏳
+
+Investigate external company/industry/news information and identify external risk signals.
+
+10
+
+Verification / Critic Agent
+
+⏳
+
+Challenge other agents’ conclusions, verify claims against evidence and identify unsupported reasoning.
+
+11
+
+Confidence & Evidence Scoring
+
+⏳
+
+Score findings based on evidence quality, source reliability, agreement/conflicts and model confidence.
+
+12
+
+Human-in-the-Loop Workflow
+
+⏳
+
+Allow analysts/credit officers to review findings, request more information, override recommendations and make final decisions.
+
+13
+
+Durable Long-Running Agent State
+
+⏳
+
+Make workflows resumable after failures, approvals, retries or processes that run for hours/days.
+
+14
+
+Agent Memory / Case Context
+
+⏳
+
+Maintain useful borrower/case context across agent interactions without blindly stuffing entire histories into prompts.
+
+15
+
+AI Evaluation Framework
+
+⏳
+
+Evaluate extraction, retrieval, agent answers, hallucination, financial correctness and end-to-end credit investigations.
+
+16
+
+LLM / Agent Observability
+
+⏳
+
+Trace prompts, model calls, tokens, latency, cost, retrieval, tool calls, errors and agent execution.
+
+17
+
+Security & Governance
+
+⏳
+
+Implement authorization, PII protection, audit trails, secrets, model governance and banking-grade controls.
+
+18
+
+Prompt-Injection Defense
+
+⏳
+
+Protect agents from malicious instructions hidden in borrower documents, retrieved content and external sources.
+
+19
+
+Production Deployment & CI/CD
+
+⏳
+
+Containerize and deploy the system to AWS with automated testing, infrastructure and deployment pipelines.
+
+20
+
+Production-Quality Repository
+
+🟡 Ongoing
+
+Tests, ADRs, documentation, incident exercises, engineering journal, clean architecture and interview-ready project narrative.
 
 
 2. Document Intelligence Pipeline
+* 2.1 Document ingestion & registration: We’ll discover incoming PDF, DOCX, XLSX, CSV, and JSON files, calculate checksums for idempotency, register document metadata in PostgreSQL, associate documents with the borrower/application, and track their processing status without prematurely assuming their document type.
+* 2.2 Document classification: We’ll classify each registered document into business categories such as financial statement, borrower profile, exposure schedule, transaction extract, or credit bureau report using deterministic filename, folder, and content-based rules, while storing the classification method and confidence.
+* 2.3 Common document representation: We’ll define a normalized ExtractedDocument and ContentBlock model so content extracted from very different file formats can be represented consistently as text blocks, tables, pages, paragraphs, sheets, and rows before downstream processing.
+* 2.4 Deterministic document extraction: We’ll build format-specific parsers for PDF, DOCX, XLSX, CSV, and JSON using conventional parsing libraries first, extracting available text and tables without involving an LLM when deterministic extraction is sufficient.
+* 2.5 Extraction persistence: We’ll persist normalized extracted content blocks into PostgreSQL with parser/version and location metadata, making extraction reproducible, auditable, and idempotent instead of keeping document content only in memory.
+* 2.6 Extraction quality evaluation: We’ll evaluate deterministic extraction using measurable signals such as extracted character count, table count, financial keyword coverage, and an overall quality score so the system can automatically determine whether conventional parsing produced usable content.
+* 2.7 AI fallback routing: We’ll introduce a quality gate that keeps successfully parsed documents on the deterministic path while routing scanned, image-based, or otherwise poorly extracted documents to a multimodal LLM only when necessary, controlling both hallucination risk and LLM cost.
+* 2.8 PDF page rendering for multimodal extraction: We’ll render difficult PDF pages into high-resolution images so multimodal models can visually understand scanned statements and complex layouts that contain little or no machine-readable text.
+* 2.9 Multimodal LLM financial extraction: We’ll use the OpenAI Responses API to extract visible financial information from difficult document images while explicitly instructing the model not to calculate, infer, estimate, or invent values that are not present in the source.
+* 2.10 Structured LLM output: We’ll enforce strict Pydantic schemas for LLM extraction so the model returns validated document sections, tables, financial metrics, values, units, periods, page numbers, and source text rather than unpredictable free-form responses.
+* 2.11 Multi-page document aggregation: We’ll combine page-level LLM extractions into a document-level representation while preserving page provenance, consolidating sections and financial metrics, and tracking operational information such as token usage, latency, and estimated LLM cost.
+* 2.12 Financial value normalization: We’ll normalize different financial representations such as 790, ₹790 Mn, 790 million, 1.2 Cr, percentages, commas, and negative values into comparable numeric forms while retaining the original raw value for auditability.
+* 2.13 Duplicate & conflict reconciliation: We’ll canonicalize financial metric names and compare observations across pages or sources to distinguish unique values, legitimate duplicates, unnormalizable values, and genuine conflicts—without silently choosing a winner when two sources disagree.
+* 2.14 Richer layout understanding — postponed: We identified advanced table/layout reconstruction as valuable for highly complex financial documents, but deliberately postponed it until real extraction failures demonstrate that the additional complexity is necessary.
+* 2.15 Document metadata extraction: We’ll preserve the essential metadata needed downstream—document identity/type, borrower/application association, filename, page/sheet location, parser information, and extraction context—while postponing more sophisticated metadata enrichment until required.
+* 2.16 Financial entity extraction & mapping: We’ll map common financial terminology and aliases such as revenue, EBITDA, net income, total debt, and operating cash flow into canonical metric names so differently worded observations can be compared consistently.
+* 2.17 Validation & provenance: We’ll preserve enough provenance around extracted information—including raw values, normalized values, source text, page numbers, document IDs, and processing metadata—so downstream AI findings can eventually be traced back to their original source instead of becoming unsupported LLM claims.
+* 2.18 Semantic chunking: We’ll convert validated document content into meaningful retrieval units such as document sections and page-level financial metric groups rather than blindly splitting text by character count, while carrying document/page metadata with every chunk.
+* 2.19 Embedding generation: We’ll generate semantic vector representations for document chunks using an embedding model so downstream systems can retrieve information based on meaning rather than requiring exact keyword matches.
+* 2.20 Vector index: We’ll store chunks, metadata, and embeddings in PostgreSQL with pgvector and create an HNSW cosine-similarity index, establishing the searchable document knowledge layer that Borrower Intelligence and later enterprise RAG workflows can use.
 
-Documents cannot simply be thrown into a vector database.
+Challenges : 
+The main challenge was creating reliable evidence from heterogeneous financial documents. We used deterministic extraction first, measured extraction quality, routed difficult scanned or complex documents to multimodal LLM extraction, enforced structured outputs, normalized financial values, detected conflicting observations instead of silently resolving them, and preserved source provenance. We then semantically chunked the validated content, generated embeddings and indexed them in PostgreSQL with pgvector for downstream RAG and agent workflows.
 
-Document
-   ↓
-classification
-   ↓
-text/table extraction
-   ↓
-layout understanding
-   ↓
-metadata extraction
-   ↓
-financial entity extraction
-   ↓
-semantic chunking
-   ↓
-embedding
-   ↓
-vector index
+Step 3 — Borrower Intelligence Agent: 
+The Borrower Intelligence Agent’s job is to answer one core question: 
+“Who is this borrower, what is their complete relationship with the bank, 
+and what important facts or inconsistencies should a credit analyst know before deeper financial and risk analysis?”
 
-The system extracts things like:
-Revenue
-EBITDA
-Net Income
-Current Assets
-Current Liabilities
-Debt
-Cash
-Receivables
-Inventory
-Operating Cash Flow
-
-Tables require separate handling from narrative text.
-
-This lets you demonstrate Document AI, rather than just PDF → chunks → embeddings.
+3.1 Borrower repository : We’ll build a repository layer that retrieves all borrower-specific structured data from PostgreSQL—customer profile, application details, directors, related parties, loans, payment history, bank accounts, financial statements, and registered documents—so the agent never queries the database directly.
+3.2 BorrowerCaseContext schema : We’ll create a unified borrower case context object that groups all structured information for a specific customer_id and application_id into one consistent in-memory representation, giving downstream signal logic and tools a clean contract instead of passing around disconnected query results.
+3.3 Deterministic borrower signals : We’ll calculate important borrower facts and inconsistencies using deterministic Python logic—such as existing exposure, requested amount, potential post-loan exposure, relationship duration, high-risk related-party counts, and declared-vs-audited revenue mismatch—so arithmetic and rule-based facts are produced by reliable code rather than inferred by the LLM.
+3.4 Borrower document retrieval :     We’ll add borrower-scoped semantic retrieval over the pgvector document index so the system can search only the current borrower/application’s documents for relevant evidence, such as audited revenue, management information, facilities, or related-party details, without exposing unrelated customer data.
+3.5 Agent tools :  We’ll convert the repository, signals, and document retrieval functionality into explicit tools that the LLM can choose to call instead of giving it the entire borrower database in one giant prompt
+3.6 Borrower Intelligence Agent : we’ll connect these tools to the OpenAI Responses API and implement the actual agent loop where the model autonomously decides which tool to call, receives the result, potentially calls additional tools, and then produces the borrower intelligence response.
+3.7 Structured output :  right now the final answer is free-form text. Next we’ll make the agent return a validated structure such as borrower_summary, key_findings, inconsistencies, missing_information, and investigation_items so downstream agents don’t have to parse arbitrary prose.
+3.8 Evidence attachment : will improve the structure further so a finding such as “revenue discrepancy” doesn’t merely contain prose—it will explicitly carry the supporting source, document ID/page, tool, and extracted evidence used to reach that finding
+3.9 Tests + failure scenarios: We should deliberately test cases like missing documents, vector retrieval returning nothing, a tool throwing a DB error, an LLM inventing an evidence ID, conflicting data, duplicate tool calls, and the agent exceeding its iteration limit. That will turn Step 3 from a demo into a more production-oriented agent.
 
 
+things we will learn : 
+tool definitions
+tool invocation
+agent loop
+structured output
+context management
+failure handling
 
 
-
-SOURCE DOCUMENTS
-PDF | DOCX | XLSX | CSV | JSON
-        │
-        ▼
-1. Document Ingestion                         ✅ DONE
-        │
-        ▼
-2. Document Classification                    ✅ DONE
-        │
-        ▼
-3. Deterministic Extraction                   ✅ DONE
-        │
-        ├── PDF                               ✅
-        ├── DOCX                              ✅
-        ├── XLSX                              ✅
-        ├── CSV                               ✅
-        └── JSON                              ✅
-        │
-        ▼
-4. Normalized Content Representation          ✅ DONE
-        │
-        ▼
-5. Extraction Persistence                     ✅ DONE
-        │
-        ▼
-6. Hard-Document Failure Testing              ✅ DONE - initial case
-        │
-        └── Scanned PDF                       ✅
-        │
-        ▼
-7. Deterministic Extraction Quality Gate      ✅ DONE - basic version
-        │
-        ▼
-8. AI / Multimodal LLM Extraction             ✅ DONE - core version
-        │
-        ├── PDF → image rendering             ✅
-        ├── Base64 image handling             ✅
-        ├── Multimodal LLM call               ✅
-        ├── Structured Output                 ✅
-        ├── Pydantic validation               ✅
-        ├── Strict JSON Schema                ✅
-        ├── Page-level extraction             ✅
-        ├── Token tracking                    ✅
-        ├── Latency tracking                  ✅
-        └── Cost estimation                   ✅
-        │
-        ▼
-9. LLM Extraction Quality Evaluation          ✅ BASIC VERSION DONE
-        │
-        ├── Ground-truth metrics              ✅
-        ├── Per-page expectations             ✅
-        ├── PASS / FAIL                       ✅
-        └── Accuracy calculation              ✅
-        │
-        ▼
-10. Multi-page LLM Extraction                 ✅ DONE
-        │
-        ├── extract_page()                     ✅
-        ├── extract_document()                 ✅
-        ├── page iteration                     ✅
-        └── error propagation                  ✅
-        │
-        ▼
-11. Document-Level Aggregation                ✅ BASIC VERSION DONE
-        │
-        ├── Merge sections                     ✅
-        ├── Merge financial metrics            ✅
-        ├── Preserve page provenance           ✅
-        ├── Aggregate tokens                   ✅
-        ├── Aggregate latency                  ✅
-        └── Aggregate cost                     ✅
-        │
-        ▼
-12. Financial Value Normalization             ← NEXT
-        │
-        ▼
-13. Duplicate / Conflict Reconciliation       ⏳
-        │
-        ▼
-14. Richer Layout Understanding               ⏳
-        │
-        ▼
-15. Metadata Extraction                       ⏳
-        │
-        ▼
-16. Financial Entity Extraction / Mapping     ⏳
-        │
-        ▼
-17. Validation + Provenance                   🟡 PARTIAL
-        │
-        ▼
-18. Semantic Chunking                         ⏳
-        │
-        ▼
-19. Embedding Generation                      ⏳
-        │
-        ▼
-20. Vector Index                              ⏳
