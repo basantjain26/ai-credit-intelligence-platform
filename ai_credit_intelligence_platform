@@ -269,9 +269,23 @@ Steps 4:
 * 4.7 Financial risk signal engine: We’ll convert calculated ratios and historical trends into deterministic financial signals such as declining revenue, rising leverage, weak debt service capacity, negative cash-flow trends, or material deterioration between periods, without allowing the LLM to invent thresholds or perform arithmetic itself.
 * 4.8 Financial document retrieval: we reconnect this deterministic intelligence to RAG: the agent will be able to see a signal such as REVENUE_DECLINE and search the borrower’s audited financial documents for evidence or management commentary that may explain why revenue declined.
 * 4.9 Financial analysis tools: We’ll expose the repository, canonical metrics, reconciled values, ratios, trend analysis, financial signals, and financial document retrieval as explicit tools so the Financial Analysis Agent can request only the information it needs instead of receiving the complete financial dataset in one giant prompt.
-* 4.10 Financial Analysis Agent: We’ll connect those tools to the OpenAI Responses API and implement an agent loop where the model decides which financial tools to call, interprets deterministic calculations and trends, retrieves additional documentary evidence when needed, and produces analyst-oriented financial observations.
+* 4.10 Financial Analysis Agent: We’ll connect those tools to the OpenAI Responses API and implement an agent loop where the model decides which financial tools to call, in what order, whether it needs additional evidence, and when it has enough information to finish
 * 4.11 Structured financial analysis output: We’ll make the agent return a validated Pydantic structure containing items such as financial_summary, calculated_ratios, trend_findings, financial_strengths, financial_concerns, inconsistencies, missing_information, and investigation_items instead of returning unstructured prose.
 * 4.12 Evidence attachment and calculation provenance: We’ll attach evidence and calculation provenance to every material financial finding so a ratio such as Debt/EBITDA can be traced to its numerator, denominator, fiscal period, source records, supporting document pages, and the deterministic calculation used to derive it.
 * 4.13 Confidence and data-quality checks: We’ll evaluate whether each financial conclusion is based on complete and reliable inputs, flagging calculations that rely on missing, conflicting, unaudited, or stale information so the system distinguishes a strong financial conclusion from a weak one.
 * 4.14 Tests and failure scenarios: We’ll deliberately test cases such as missing EBITDA, zero denominators, conflicting audited and declared values, incomplete fiscal years, malformed numeric data, duplicate observations, failed document retrieval, unsupported ratios, LLM-generated calculations that disagree with deterministic results, invalid evidence references, and repeated agent tool calls.
 
+Step 5 : Transaction Investigation Agent 
+5.1 — Transaction Feature Engineering - How raw data becomes ML features
+5.2 — Anomaly Detection - Statistics + Isolation Forest + evaluation
+5.3 — Transaction Investigation Agent - ML output → tools → autonomous LLM investigation
+5.4 — Production Validation - Prediction lineage + hallucination protection
+
+
+Step 6 : Enterprise RAG
+6.1 - Semantic Retrieval Baseline
+6.2 - LangChain Retrieval
+6.3 - Metadata Filtering
+6.4 - Reranking / Context Selection
+6.5 - Grounded Answer + Citations
+6.6 - RAG Evaluation

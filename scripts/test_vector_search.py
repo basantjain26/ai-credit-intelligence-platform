@@ -1,101 +1,106 @@
-from src.document_intelligence.embeddings.openai_embedder import (
-    OpenAIEmbedder,
-)
-
-from src.document_intelligence.embeddings.vector_repository import (
-    VectorRepository,
-)
+from src.rag.query_embedding import QueryEmbedder
+from src.rag.vector_search import search_similar_chunks
 
 
-QUERIES = [
-    "What was ABC Manufacturing revenue?",
-    "How much debt does the borrower have?",
-    "What is the company's EBITDA?",
-    "What was operating cash flow?",
-]
+customer_id = "CUST_000001"
+application_id = "APP_2026_00001"
 
 
-def main():
+def main() -> None:
 
-    embedder = (
-        OpenAIEmbedder()
+    query = (
+        "What concerns exist around ABC Manufacturing's "
+        "debt and repayment capacity?"
     )
 
-    repository = (
-        VectorRepository()
+    # -----------------------------------------
+    # Step 1: Embed the query
+    # -----------------------------------------
+
+    embedder = QueryEmbedder()
+
+    query_embedding = embedder.embed(
+        query
     )
 
-    try:
+    print("=" * 100)
+    print("QUERY")
+    print("=" * 100)
 
-        for query in QUERIES:
+    print(query)
 
-            print(
-                "\n"
-                + "=" * 80
-            )
+    print(
+        f"\nEmbedding dimension: "
+        f"{len(query_embedding)}"
+    )
 
-            print(
-                f"QUERY: {query}"
-            )
+    # -----------------------------------------
+    # Step 2: Vector search
+    # -----------------------------------------
 
-            query_embedding = (
-                embedder.embed_text(
-                    query
-                )
-            )
+    results = search_similar_chunks(
+        query_embedding=query_embedding,
+        customer_id=customer_id,
+        application_id=application_id,
+        top_k=5,
+    )
 
-            results = (
-                repository.search(
-                    query_embedding=(
-                        query_embedding
-                    ),
-                    limit=3,
-                )
-            )
+    print("\n")
+    print("=" * 100)
+    print("TOP 5 SEMANTIC RESULTS")
+    print("=" * 100)
 
-            for rank, result in enumerate(
-                results,
-                start=1,
-            ):
+    for rank, result in enumerate(
+        results,
+        start=1,
+    ):
 
-                print(
-                    f"\nRESULT #{rank}"
-                )
+        print("\n" + "-" * 100)
 
-                print(
-                    "Similarity:",
-                    round(
-                        result["similarity"],
-                        4,
-                    ),
-                )
+        print(
+            f"Rank: {rank}"
+        )
 
-                print(
-                    "Document:",
-                    result["document_id"],
-                )
+        print(
+            f"Similarity: "
+            f"{result.similarity_score:.4f}"
+        )
 
-                print(
-                    "Page:",
-                    result["page_number"],
-                )
+        print(
+            f"Cosine distance: "
+            f"{result.cosine_distance:.4f}"
+        )
 
-                print(
-                    "Chunk type:",
-                    result["chunk_type"],
-                )
+        print(
+            f"Document: "
+            f"{result.document_name}"
+        )
 
-                print(
-                    "\nText:"
-                )
+        print(
+            f"Document type: "
+            f"{result.document_type}"
+        )
 
-                print(
-                    result["text"][:1000]
-                )
+        print(
+            f"Chunk ID: "
+            f"{result.chunk_id}"
+        )
 
-    finally:
+        print(
+            f"Chunk type: "
+            f"{result.chunk_type}"
+        )
 
-        repository.close()
+        print(
+            f"Page: "
+            f"{result.page_number}"
+        )
+
+        print("\nText:")
+
+        print(
+            result.chunk_text
+        )
 
 
 if __name__ == "__main__":

@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import os
 from typing import Any
+from unittest import result
 
 from dotenv import load_dotenv
 from openai import OpenAI
@@ -482,6 +483,39 @@ class TransactionInvestigationAgent:
         self._validate_result_scope(
             result
         )
+
+        # =========================================================
+        # STEP 5.4
+        # DETERMINISTIC PROVENANCE VALIDATION
+        # =========================================================
+
+        validator = (
+            TransactionProvenanceValidator(
+                context=self.context
+            )
+        )
+
+        validation = validator.validate(
+            result
+        )
+
+        if not validation.is_valid:
+
+            details = "\n".join(
+                (
+                    f"- [{issue.code}] "
+                    f"{issue.message} "
+                    f"(finding_id={issue.finding_id}, "
+                    f"transaction_id={issue.transaction_id})"
+                )
+                for issue in validation.issues
+            )
+
+            raise RuntimeError(
+                "Transaction investigation failed "
+                "provenance validation:\n"
+                + details
+            )
 
         return result
 
