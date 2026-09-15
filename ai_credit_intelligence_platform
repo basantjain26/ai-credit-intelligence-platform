@@ -1,5 +1,7 @@
 GitHub + Docker Compose + PostgreSQL locally, files/documents locally with an S3-compatible abstraction, and later deploy the working system to AWS RDS + S3.
 
+One adjustment I’d make as we continue: at each new substep, I’ll explicitly call out ① what we’re building, ② GenAI/Agentic AI concepts, ③ ML concepts, ④ production concepts, and ⑤ interview questions this step prepares you for. That will make the learning path much easier to track.
+
 1. Data architecture
 
 We deliberately make the data environment realistic.
@@ -256,4 +258,20 @@ structured output
 context management
 failure handling
 
+
+Steps 4: 
+* 4.1 Financial data repository: We’ll build a repository layer dedicated to financial analysis that retrieves historical financial statements, application-declared figures, existing debt, and other structured financial data required for ratio calculations and trend analysis, keeping database access separate from the agent itself.
+* 4.2 FinancialAnalysisContext schema: We’ll create a unified financial analysis context for the current borrower/application containing the relevant fiscal periods, income statement values, balance-sheet values, cash-flow values, debt exposure, and available document-derived observations so downstream calculations operate on a consistent contract.
+* 4.3 Canonical financial metric mapping: We’ll standardize financial terminology from different structured and document sources into canonical metrics such as revenue, EBITDA, EBIT, net income, total debt, current assets, current liabilities, equity, interest expense, and operating cash flow so calculations are not dependent on source-specific naming.
+* 4.4 Financial value reconciliation: We’ll reconcile multiple observations of the same metric across database records, audited statements, borrower-declared values, and extracted documents, identifying exact matches, duplicates, missing values, and genuine conflicts instead of silently selecting whichever value appears first.
+* 4.5 Deterministic financial ratio engine: We’ll calculate financial ratios using deterministic Python logic rather than an LLM, including metrics such as Debt/EBITDA, EBITDA margin, net profit margin, debt-to-equity, current ratio, interest coverage, DSCR where inputs are available, and cash-flow-related ratios.
+* 4.6 Historical trend analysis: we’ll calculate year-over-year revenue growth, EBITDA growth, margin movement, debt growth, cash-flow movement, and identify improving/deteriorating financial trajectories without using an LLM for the math.
+* 4.7 Financial risk signal engine: We’ll convert calculated ratios and historical trends into deterministic financial signals such as declining revenue, rising leverage, weak debt service capacity, negative cash-flow trends, or material deterioration between periods, without allowing the LLM to invent thresholds or perform arithmetic itself.
+* 4.8 Financial document retrieval: we reconnect this deterministic intelligence to RAG: the agent will be able to see a signal such as REVENUE_DECLINE and search the borrower’s audited financial documents for evidence or management commentary that may explain why revenue declined.
+* 4.9 Financial analysis tools: We’ll expose the repository, canonical metrics, reconciled values, ratios, trend analysis, financial signals, and financial document retrieval as explicit tools so the Financial Analysis Agent can request only the information it needs instead of receiving the complete financial dataset in one giant prompt.
+* 4.10 Financial Analysis Agent: We’ll connect those tools to the OpenAI Responses API and implement an agent loop where the model decides which financial tools to call, interprets deterministic calculations and trends, retrieves additional documentary evidence when needed, and produces analyst-oriented financial observations.
+* 4.11 Structured financial analysis output: We’ll make the agent return a validated Pydantic structure containing items such as financial_summary, calculated_ratios, trend_findings, financial_strengths, financial_concerns, inconsistencies, missing_information, and investigation_items instead of returning unstructured prose.
+* 4.12 Evidence attachment and calculation provenance: We’ll attach evidence and calculation provenance to every material financial finding so a ratio such as Debt/EBITDA can be traced to its numerator, denominator, fiscal period, source records, supporting document pages, and the deterministic calculation used to derive it.
+* 4.13 Confidence and data-quality checks: We’ll evaluate whether each financial conclusion is based on complete and reliable inputs, flagging calculations that rely on missing, conflicting, unaudited, or stale information so the system distinguishes a strong financial conclusion from a weak one.
+* 4.14 Tests and failure scenarios: We’ll deliberately test cases such as missing EBITDA, zero denominators, conflicting audited and declared values, incomplete fiscal years, malformed numeric data, duplicate observations, failed document retrieval, unsupported ratios, LLM-generated calculations that disagree with deterministic results, invalid evidence references, and repeated agent tool calls.
 
