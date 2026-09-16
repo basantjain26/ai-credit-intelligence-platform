@@ -21,6 +21,12 @@ SUPPORTED_FORMATS = {
     ".xlsx",
     ".csv",
     ".json",
+    ".txt",
+}
+
+
+ENTERPRISE_DOCUMENT_FOLDERS = {
+    "policies",
 }
 
 
@@ -43,9 +49,25 @@ def infer_document_type(file_path: Path) -> str:
         "exposure_schedules": "EXPOSURE_SCHEDULE",
         "transaction_extracts": "TRANSACTION_EXTRACT",
         "credit_bureau": "CREDIT_BUREAU_REPORT",
+        "policies": "LENDING_POLICY",
     }
 
     return mapping.get(folder, "UNKNOWN")
+
+
+def infer_document_scope(
+    file_path: Path,
+) -> tuple[str | None, str | None]:
+
+    folder = file_path.parent.name
+
+    if folder in ENTERPRISE_DOCUMENT_FOLDERS:
+        return None, None
+
+    return (
+        "CUST_000001",
+        "APP_2026_00001",
+    )
 
 
 def discover_documents():
@@ -59,16 +81,33 @@ def discover_documents():
         if file_path.suffix.lower() not in SUPPORTED_FORMATS:
             continue
 
+        customer_id, application_id = (
+            infer_document_scope(file_path)
+        )
+
         document = {
-            "document_id": f"DOC_{uuid.uuid4().hex[:12].upper()}",
-            "customer_id": "CUST_000001",
-            "application_id": "APP_2026_00001",
-            "document_type": infer_document_type(file_path),
+            "document_id": (
+                f"DOC_{uuid.uuid4().hex[:12].upper()}"
+            ),
+            "customer_id": customer_id,
+            "application_id": application_id,
+            "document_type": infer_document_type(
+                file_path
+            ),
             "document_name": file_path.name,
-            "file_format": file_path.suffix.lower().replace(".", "").upper(),
+            "file_format": (
+                file_path.suffix
+                .lower()
+                .replace(".", "")
+                .upper()
+            ),
             "source_path": str(file_path),
-            "file_size_bytes": file_path.stat().st_size,
-            "checksum_sha256": calculate_sha256(file_path),
+            "file_size_bytes": (
+                file_path.stat().st_size
+            ),
+            "checksum_sha256": (
+                calculate_sha256(file_path)
+            ),
         }
 
         documents.append(document)
@@ -132,7 +171,9 @@ def main():
 
     documents = discover_documents()
 
-    print(f"Discovered {len(documents)} documents")
+    print(
+        f"Discovered {len(documents)} documents"
+    )
 
     register_documents(documents)
 

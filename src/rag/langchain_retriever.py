@@ -3,86 +3,51 @@ from __future__ import annotations
 from typing import Any
 
 from langchain_core.documents import Document
-from langchain_core.retrievers import BaseRetriever
-from pydantic import Field
+from langchain_core.retrievers import (
+    BaseRetriever,
+)
+from pydantic import ConfigDict
 
-from src.rag.query_embedding import QueryEmbedder
-from src.rag.vector_search import search_similar_chunks
+from src.rag.query_embedding import (
+    QueryEmbedder,
+)
+
+from src.rag.vector_search import (
+    search_similar_chunks,
+)
 
 
-class CreditDocumentRetriever(BaseRetriever):
+class CreditDocumentRetriever(
+    BaseRetriever
+):
     """
-    LangChain retriever for the AI Credit Intelligence Platform.
+    LangChain retriever for the
+    AI Credit Intelligence Platform.
 
-    This retriever intentionally reuses our existing retrieval
-    implementation rather than creating another vector store.
+    Supports two trusted retrieval scopes:
 
-    Retrieval flow:
+    CASE
+        Retrieves borrower/application-specific
+        documents.
 
-        User query
-            ↓
-        QueryEmbedder
-            ↓
-        OpenAI query embedding
-            ↓
-        PostgreSQL / pgvector
-            ↓
-        Customer/application filtering
-            ↓
-        Optional document-type filtering
-            ↓
-        Cosine similarity ranking
-            ↓
-        LangChain Document objects
-
-    The retriever preserves provenance metadata required later
-    for grounded answers and citations.
+    ENTERPRISE
+        Retrieves shared enterprise knowledge
+        such as lending policies.
     """
 
-    # =========================================================
-    # TRUSTED CASE SCOPE
-    # =========================================================
-
-    customer_id: str = Field(
-        ...,
-        description=(
-            "Trusted customer identifier used to scope retrieval."
-        ),
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
     )
 
-    application_id: str = Field(
-        ...,
-        description=(
-            "Trusted loan application identifier used "
-            "to scope retrieval."
-        ),
-    )
+    customer_id: str | None = None
 
-    # =========================================================
-    # RETRIEVAL CONFIGURATION
-    # =========================================================
+    application_id: str | None = None
 
-    top_k: int = Field(
-        default=5,
-        ge=1,
-        description=(
-            "Maximum number of semantically similar chunks "
-            "to retrieve."
-        ),
-    )
+    top_k: int = 5
 
-    document_type: str | None = Field(
-        default=None,
-        description=(
-            "Optional document-type metadata filter. "
-            "If None, all document types within the case "
-            "are eligible for semantic retrieval."
-        ),
-    )
+    document_type: str | None = None
 
-    # =========================================================
-    # LANGCHAIN RETRIEVER IMPLEMENTATION
-    # =========================================================
+    scope: str = "CASE"
 
     def _get_relevant_documents(
         self,
@@ -90,94 +55,128 @@ class CreditDocumentRetriever(BaseRetriever):
         *,
         run_manager: Any = None,
     ) -> list[Document]:
-        """
-        Retrieve relevant document chunks for a natural-language
-        query and convert them into LangChain Document objects.
-        """
 
-        query = query.strip()
-
-        if not query:
-            raise ValueError(
-                "Query cannot be empty."
-            )
-
-        # -----------------------------------------------------
-        # Step 1:
-        # Convert the user's natural-language query into the
-        # same embedding space used by document chunks.
-        # -----------------------------------------------------
-
-        embedder = QueryEmbedder()
-
-        query_embedding = embedder.embed(
-            query
+        normalized_scope = (
+            self.scope.upper()
         )
 
-        # -----------------------------------------------------
-        # Step 2:
-        # Perform case-scoped pgvector semantic search.
-        #
-        # document_type is optional.
-        #
-        # Example:
-        #
-        # document_type="FINANCIAL_STATEMENT"
-        #
-        # restricts retrieval to financial statements.
-        # -----------------------------------------------------
+        if normalized_scope not in {
+            "CASE",
+            "ENTERPRISE",
+        }:
+            raise ValueError(
+                "scope must be CASE "
+                "or ENTERPRISE."
+            )
+
+        if normalized_scope == "CASE":
+
+            if not self.customer_id:
+                raise ValueError(
+                    "customer_id is required "
+                    "for CASE scope."
+                )
+
+            if not self.application_id:
+                raise ValueError(
+                    "application_id is required "
+                    "for CASE scope."
+                )
+
+        query_embedder = QueryEmbedder()
+
+        query_embedding = (
+            query_embedder.embed(
+                query
+            )
+        )
 
         results = search_similar_chunks(
             query_embedding=query_embedding,
             customer_id=self.customer_id,
-            application_id=self.application_id,
+            application_id=(
+                self.application_id
+            ),
             top_k=self.top_k,
-            document_type=self.document_type,
+            document_type=(
+                self.document_type
+            ),
+            scope=normalized_scope,
         )
-
-        # -----------------------------------------------------
-        # Step 3:
-        # Convert our internal SearchResult objects into the
-        # standard LangChain Document representation.
-        # -----------------------------------------------------
 
         documents: list[Document] = []
 
         for result in results:
 
-            # Start with metadata generated by our own
-            # retrieval/provenance layer.
-            metadata = {
-                "chunk_id": result.chunk_id,
-                "document_id": result.document_id,
-                "document_name": result.document_name,
-                "document_type": result.document_type,
-                "chunk_type": result.chunk_type,
-                "page_number": result.page_number,
-                "cosine_distance": result.cosine_distance,
-                "similarity_score": result.similarity_score,
-            }
-
-            # -------------------------------------------------
-            # Preserve additional metadata from document_chunks.
-            #
-            # We add stored metadata first, then reapply trusted
-            # provenance fields so arbitrary stored metadata
-            # cannot overwrite chunk_id/document_id/etc.
-            # -------------------------------------------------
-
-            combined_metadata = {
-                **result.metadata,
-                **metadata,
-            }
-
-            document = Document(
-                page_content=result.chunk_text,
-                metadata=combined_metadata,
+            stored_metadata = (
+                result.metadata or {}
             )
 
+            metadata = {
+                **stored_metadata,
+
+                # Trusted provenance fields
+                # overwrite anything that may
+                # exist in stored chunk metadata.
+                "chunk_id": (
+                    result.chunk_id
+                ),
+                "document_id": (
+                    result.document_id
+                ),
+                "document_name": (
+                    result.document_name
+                ),
+                "document_type": (
+                    result.document_type
+                ),
+                "chunk_type": (
+                    result.chunk_type
+                ),
+                "page_number": (
+                    result.page_number
+                ),
+                "cosine_distance": (
+                    result.cosine_distance
+                ),
+                "similarity_score": (
+                    result.similarity_score
+                ),
+
+                # Retrieval scope itself is
+                # trusted application metadata.
+                "retrieval_scope": (
+                    normalized_scope
+                ),
+            }
+
+            if normalized_scope == "CASE":
+
+                metadata[
+                    "customer_id"
+                ] = self.customer_id
+
+                metadata[
+                    "application_id"
+                ] = self.application_id
+
+            else:
+
+                metadata[
+                    "customer_id"
+                ] = None
+
+                metadata[
+                    "application_id"
+                ] = None
+
             documents.append(
-                document
+                Document(
+                    page_content=(
+                        result.chunk_text
+                    ),
+                    metadata=metadata,
+                )
             )
 
         return documents

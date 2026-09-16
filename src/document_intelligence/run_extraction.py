@@ -6,10 +6,10 @@ from src.document_intelligence.extractors.docx import DOCXExtractor
 from src.document_intelligence.extractors.xlsx import XLSXExtractor
 from src.document_intelligence.extractors.csv import CSVExtractor
 from src.document_intelligence.extractors.json_file import JSONExtractor
+from src.document_intelligence.extractors.txt import TXTExtractor
 
 from src.document_intelligence.repository import (
     ExtractionRepository,
-    DB_CONFIG,
 )
 from src.settings import DB_CONFIG
 
@@ -20,6 +20,7 @@ EXTRACTORS = {
     "XLSX": XLSXExtractor(),
     "CSV": CSVExtractor(),
     "JSON": JSONExtractor(),
+    "TXT": TXTExtractor(),
 }
 
 
@@ -37,7 +38,14 @@ def get_documents():
                     source_path
                 FROM documents
                 WHERE processing_status = 'CLASSIFIED'
-                  AND file_format IN ('PDF', 'DOCX', 'XLSX', 'CSV', 'JSON')
+                  AND file_format IN (
+                      'PDF',
+                      'DOCX',
+                      'XLSX',
+                      'CSV',
+                      'JSON',
+                      'TXT'
+                  )
                 ORDER BY document_name
                 """
             )

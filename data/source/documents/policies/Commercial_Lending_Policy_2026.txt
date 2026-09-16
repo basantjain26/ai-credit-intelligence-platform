@@ -1,0 +1,77 @@
+COMMERCIAL LENDING POLICY 2026
+Version: 2026.1
+Effective Date: January 1, 2026
+
+1. PURPOSE
+
+This policy establishes minimum credit standards for commercial lending facilities,
+including working capital facilities, term loans, and revolving credit facilities.
+
+Final credit decisions remain subject to authorized credit officer approval.
+
+2. DEBT SERVICE COVERAGE
+
+POL_DSCR_001
+
+Borrowers requesting working capital facilities must maintain a minimum Debt Service
+Coverage Ratio (DSCR) of 1.25.
+
+A DSCR below 1.25 constitutes a policy exception and requires documented credit
+officer review.
+
+3. LEVERAGE
+
+POL_LEVERAGE_001
+
+Debt-to-EBITDA should not exceed 4.00 for standard commercial borrowers.
+
+A Debt-to-EBITDA ratio above 4.00 constitutes a leverage policy exception.
+
+4. FINANCIAL DOCUMENTATION
+
+POL_DOC_001
+
+The borrower must provide audited financial statements for the latest completed
+financial year.
+
+If audited financial statements are unavailable, the application must be classified
+as having insufficient financial documentation until an authorized exception is
+recorded.
+
+5. BANKING RELATIONSHIP
+
+POL_RELATIONSHIP_001
+
+Working capital borrowers should have a minimum banking relationship of two years
+unless an authorized credit officer approves an exception.
+
+6. RELATED-PARTY TRANSACTIONS
+
+POL_RELATED_PARTY_001
+
+Material transactions involving a borrower, its directors, affiliates, subsidiaries,
+or other related parties require enhanced credit review.
+
+The analyst must evaluate the transaction's business purpose, size, frequency, and
+potential impact on borrower liquidity.
+
+7. LARGE OR UNUSUAL TRANSACTIONS
+
+POL_TRANSACTION_001
+
+Large, unusual, or insufficiently explained transactions identified during account
+analysis require enhanced review before final credit approval.
+
+The presence of an unusual transaction does not by itself establish fraud or require
+automatic rejection.
+
+8. CREDIT DECISION AUTHORITY
+
+POL_AUTHORITY_001
+
+Automated models, analytical systems, and artificial intelligence systems may support
+credit analysis but must not independently approve or reject a commercial credit
+application.
+
+Final approval, rejection, or exception authority remains with authorized human
+credit officers.

@@ -87,6 +87,22 @@ DOCUMENT_TYPE_RULES = {
             "credit exposure",
         ],
     },
+    "LENDING_POLICY": {
+        "folder_keywords": ["policies"],
+        "filename_keywords": [
+            "policy",
+            "lending_policy",
+            "commercial_lending",
+        ],
+        "content_keywords": [
+            "commercial lending policy",
+            "debt service coverage",
+            "dscr",
+            "policy exception",
+            "related party",
+            "credit officer",
+        ],
+    },
 }
 
 def normalize(text: str) -> str:
@@ -182,7 +198,11 @@ def read_text_preview(file_path: Path) -> str:
                         break
 
             return " ".join(lines)
-
+        
+        if suffix == ".txt":
+            return file_path.read_text(
+                encoding="utf-8")[:5000]
+        
         if suffix == ".docx":
             return read_docx_preview(file_path)
 

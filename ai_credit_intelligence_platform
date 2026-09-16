@@ -289,3 +289,8 @@ Step 6 : Enterprise RAG
 6.4 - Reranking / Context Selection
 6.5 - Grounded Answer + Citations
 6.6 - RAG Evaluation
+
+Step 7 — Policy Compliance Agent
+7.1 - Policy document + RAG retrieval
+7.2 - Deterministic policy engine
+7.3 - Policy Agent + evidence-backed result

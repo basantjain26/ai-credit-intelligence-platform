@@ -17,13 +17,15 @@ DEFAULT_EMBEDDING_MODEL = os.getenv(
 
 class QueryEmbedder:
     """
-    Converts a natural-language RAG query into an embedding vector.
+    Converts a natural-language RAG query
+    into an embedding vector.
     """
 
     def __init__(
         self,
         model: str = DEFAULT_EMBEDDING_MODEL,
     ) -> None:
+
         self.model = model
         self.client = OpenAI()
 
@@ -39,16 +41,21 @@ class QueryEmbedder:
                 "Query cannot be empty."
             )
 
-        response = self.client.embeddings.create(
-            model=self.model,
-            input=query,
+        response = (
+            self.client.embeddings.create(
+                model=self.model,
+                input=query,
+            )
         )
 
-        embedding = response.data[0].embedding
+        embedding = (
+            response.data[0].embedding
+        )
 
         if not embedding:
             raise RuntimeError(
-                "Embedding API returned an empty embedding."
+                "Embedding API returned "
+                "an empty embedding."
             )
 
         return embedding
